@@ -1,0 +1,5 @@
+scikit-learn
+pandas
+numpy
+joblib
+flask  # If you decide to use Flask for serving the ML model as an API
