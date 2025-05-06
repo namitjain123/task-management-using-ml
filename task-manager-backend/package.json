@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.1",
+    "pandas": "^0.0.3",
     "python": "^0.0.4",
     "python-shell": "^5.0.0",
     "shell": "^0.12.0"

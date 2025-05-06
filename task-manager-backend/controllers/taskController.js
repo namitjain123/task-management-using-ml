@@ -1,45 +1,63 @@
 // controllers/taskController.js
 const Task = require('../models/Task');
 const mlService = require('../services/mlService');
+const { predictTaskPriority } = require('../services/mlService');
 
 // Get all tasks for a user
 exports.getTasks = async (req, res) => {
-  const tasks = await Task.find({ userId: req.user.userId });
-  res.json(tasks);
+  try {
+    const tasks = await Task.find({ userId: req.user.userId });
+    res.json(tasks);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching tasks');
+  }
 };
-
 // controllers/taskController.js
 exports.createTask = async (req, res) => {
   const { title, description, dueDate, priority, tags, estimatedTime, assignedTo } = req.body;
 
-  // Ensure required fields are present
   if (!title || !description) {
     return res.status(400).send('Title and description are required');
   }
 
-  // Convert estimated time from string to number (in minutes)
   let timeInMinutes = 0;
+
+  // Add log to verify estimatedTime value
+  console.log('Estimated Time:', estimatedTime);
+
   if (estimatedTime) {
-    const timeParts = estimatedTime.split(' ');  // Split by space (e.g., "2 hours")
-    if (timeParts[1] === 'hours') {
-      timeInMinutes = parseInt(timeParts[0]) * 60;  // Convert hours to minutes
-    } else if (timeParts[1] === 'minutes') {
-      timeInMinutes = parseInt(timeParts[0]);
+    if (typeof estimatedTime === 'string') {
+      const timeParts = estimatedTime.split(' ');
+      if (timeParts.length === 2) {
+        if (timeParts[1] === 'hours') {
+          timeInMinutes = parseInt(timeParts[0]) * 60;
+        } else if (timeParts[1] === 'minutes') {
+          timeInMinutes = parseInt(timeParts[0]);
+        }
+      }
     }
   }
 
-  const newTask = new Task({
-    title,
-    description,
-    dueDate: dueDate || null,
-    priority: priority || 'Medium',
-    tags: tags || [],
-    estimatedTime: timeInMinutes,
-    assignedTo: assignedTo || 'Unassigned',
-    userId: req.user.userId,  // Assuming you're associating tasks with users
-  });
-
   try {
+    // Add log to verify model is being called
+    console.log('Calling the model for prediction...');
+    const predictedPriority = await predictTaskPriority(description, tags);
+    
+    // Add log to check predictedPriority
+    console.log('Predicted Priority:', predictedPriority);
+
+    const newTask = new Task({
+      title,
+      description,
+      dueDate: dueDate || null,
+      priority: predictedPriority || 'Medium',
+      tags: tags || [],
+      estimatedTime: timeInMinutes,
+      assignedTo: assignedTo || 'Unassigned',
+      userId: req.user.userId,
+    });
+
     await newTask.save();
     res.status(201).send('Task created successfully');
   } catch (err) {
@@ -49,14 +67,18 @@ exports.createTask = async (req, res) => {
 };
 
 
+
+
 // Update a task
-// controllers/taskController.js
 exports.editTask = async (req, res) => {
     const taskId = req.params.id;
-    const { title, description } = req.body;
+    const { title, description, tags, estimatedTime, assignedTo } = req.body;
   
     try {
-      const updatedTask = await Task.findByIdAndUpdate(taskId, { title, description }, { new: true });
+      // Predict the task priority using the ML model
+      const predictedPriority = await predictTaskPriority(description, tags);
+
+      const updatedTask = await Task.findByIdAndUpdate(taskId, { title, description, tags, estimatedTime, assignedTo, priority: predictedPriority }, { new: true });
       if (!updatedTask) return res.status(404).send('Task not found');
       res.status(200).send(updatedTask);
     } catch (err) {
@@ -67,8 +89,17 @@ exports.editTask = async (req, res) => {
 
 // Delete a task
 exports.deleteTask = async (req, res) => {
-  const task = await Task.findById(req.params.id);
-  if (!task) return res.status(404).send('Task not found');
-  await Task.findByIdAndDelete(req.params.id);
-  res.send('Task deleted');
+  const taskId = req.params.id;
+
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).send('Task not found');
+
+    // Delete the task
+    await Task.findByIdAndDelete(taskId);
+    res.status(200).send('Task deleted');
+  } catch (err) {
+    console.error('Error deleting task:', err);
+    res.status(500).send('Error deleting task');
+  }
 };
