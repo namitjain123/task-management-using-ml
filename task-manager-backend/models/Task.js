@@ -11,16 +11,15 @@ const taskSchema = new mongoose.Schema({
   },
   dueDate: {
     type: Date,
-    default: null,
+    required: true,
   },
   priority: {
     type: String,
-    enum: ['Low', 'Medium', 'High'],  // You can use a limited set of priority values
-    default: 'Medium',
+    required: true,
   },
   tags: {
     type: [String],  // This is an array of strings
-    default: [],
+    required: true,
   },
   estimatedTime: {
     type: Number,  // Store the estimated time as a number (minutes or hours)
