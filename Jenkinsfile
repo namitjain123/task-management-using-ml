@@ -1,40 +1,48 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'taskmanagement:latest'
-    }
-
     stages {
-        stage('Build') {
+        stage('Build Frontend') {
             steps {
                 script {
-                    echo 'Building Docker Image...'
-                    sh 'docker build -t ${DOCKER_IMAGE} .'
+                    // Build the frontend Docker image
+                    sh 'docker build -f task-manager-client/Dockerfile -t task-manager-frontend task-manager-client/'
                 }
             }
         }
 
-        stage('Test') {
+        stage('Build Backend') {
             steps {
                 script {
-                    echo 'Running Unit Tests...'
-                    sh 'npm test'  // Run Jest or Mocha tests
+                    // Build the backend Docker image
+                    sh 'docker build -f task-manager-backend/Dockerfile -t task-manager-backend task-manager-backend/'
                 }
             }
         }
 
-        
+        stage('Run Frontend') {
+            steps {
+                script {
+                    // Run the frontend container
+                    sh 'docker run -d -p 3000:3000 task-manager-frontend'
+                }
+            }
+        }
 
-        // Add additional stages as needed (e.g., Security, Deploy)
+        stage('Run Backend') {
+            steps {
+                script {
+                    // Run the backend container
+                    sh 'docker run -d -p 5000:5000 task-manager-backend'
+                }
+            }
+        }
     }
-
+    
     post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
+        always {
+            echo 'Cleaning up Docker containers'
+            sh 'docker ps -q | xargs docker rm -f'  // Clean up all running containers after the pipeline
         }
     }
 }
