@@ -1,10 +1,7 @@
 pipeline {
-     agent {
-        docker {
-            image 'docker' // docker CLI image
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+     agent any
+        
+    
 
     stages {
         stage('Build Frontend') {
