@@ -41,10 +41,12 @@ pipeline {
         }
     }
     
-    post {
-        always {
-            echo 'Cleaning up Docker containers'
-            bat 'docker ps -q | xargs docker rm -f'  // Clean up all running containers after the pipeline
-        }
+   post {
+    always {
+        echo 'Cleaning up Docker containers'
+        bat '''
+        for /f "tokens=*" %%i in ('docker ps -q') do docker rm -f %%i
+        '''
     }
+}
 }
