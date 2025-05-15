@@ -8,7 +8,7 @@ pipeline {
             steps {
                 script {
                     // Build the frontend Docker image
-                    sh 'docker build -f task-manager-client/Dockerfile -t task-manager-frontend task-manager-client/'
+                    bat 'docker build -f task-manager-client/Dockerfile -t task-manager-frontend task-manager-client/'
                 }
             }
         }
@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     // Build the backend Docker image
-                    sh 'docker build -f task-manager-backend/Dockerfile -t task-manager-backend task-manager-backend/'
+                    bat 'docker build -f task-manager-backend/Dockerfile -t task-manager-backend task-manager-backend/'
                 }
             }
         }
@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     // Run the frontend container
-                    sh 'docker run -d -p 3000:3000 task-manager-frontend'
+                    bat 'docker run -d -p 3000:3000 task-manager-frontend'
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     // Run the backend container
-                    sh 'docker run -d -p 5000:5000 task-manager-backend'
+                    bat 'docker run -d -p 5000:5000 task-manager-backend'
                 }
             }
         }
@@ -44,7 +44,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up Docker containers'
-            sh 'docker ps -q | xargs docker rm -f'  // Clean up all running containers after the pipeline
+            bat 'docker ps -q | xargs docker rm -f'  // Clean up all running containers after the pipeline
         }
     }
 }
