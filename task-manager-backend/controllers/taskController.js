@@ -59,7 +59,7 @@ exports.createTask = async (req, res) => {
     });
 
     await newTask.save();
-    res.status(201).send('Task created successfully');
+    res.status(201).json(newTask);
   } catch (err) {
     console.error('Error creating task:', err);
     res.status(500).send('Error creating task');
