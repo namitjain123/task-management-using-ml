@@ -1,52 +1,60 @@
 pipeline {
-     agent any
-        
-    
+    agent any
 
     stages {
         stage('Build Frontend') {
             steps {
-                script {
-                    // Build the frontend Docker image
-                    bat 'docker build -f task-manager-client/Dockerfile -t task-manager-frontend task-manager-client/'
-                }
+                bat 'docker build -f task-manager-client/Dockerfile -t task-manager-frontend task-manager-client/'
             }
         }
 
         stage('Build Backend') {
             steps {
+                bat 'docker build -f task-manager-backend/Dockerfile -t task-manager-backend task-manager-backend/'
+            }
+        }
+
+        stage('Test Backend') {
+            steps {
                 script {
-                    // Build the backend Docker image
-                    bat 'docker build -f task-manager-backend/Dockerfile -t task-manager-backend task-manager-backend/'
+                    // Run backend container, execute tests, and capture exit code
+                    bat '''
+                    docker run --rm task-manager-backend sh -c "npm test"
+                    '''
                 }
             }
         }
 
-        stage('Run Frontend') {
+        stage('Test Frontend') {
             steps {
                 script {
-                    // Run the frontend container
-                    bat 'docker run -d -p 3000:3000 task-manager-frontend'
+                    // Run frontend container, execute tests, and capture exit code
+                    bat '''
+                    docker run --rm task-manager-frontend sh -c "npm test"
+                    '''
                 }
             }
         }
 
         stage('Run Backend') {
             steps {
-                script {
-                    // Run the backend container
-                    bat 'docker run -d -p 5000:5000 task-manager-backend'
-                }
+                bat 'docker run -d -p 5000:5000 task-manager-backend'
+            }
+        }
+
+        stage('Run Frontend') {
+            steps {
+                bat 'docker run -d -p 3000:3000 task-manager-frontend'
             }
         }
     }
-    
-   post {
-    always {
-        echo 'Cleaning up Docker containers'
-        bat '''
-        for /f "tokens=*" %%i in ('docker ps -q') do docker rm -f %%i
-        '''
+
+    post {
+        always {
+            echo 'Cleaning up Docker containers'
+            bat '''
+            for /f "tokens=*" %%i in ('docker ps -q') do docker rm -f %%i
+            '''
+        }
     }
-}
 }
