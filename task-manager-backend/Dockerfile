@@ -1,22 +1,23 @@
 # Use Node.js image for the backend
 FROM node:16
 
-# Set the working directory for the backend
+# Set working directory inside container
 WORKDIR /usr/src/app
 
-# Copy the package.json and package-lock.json files for backend
+# Copy package.json and package-lock.json first (for caching)
 COPY package*.json ./
 
 # Install backend dependencies
 RUN npm install
 
-# Copy the backend source code
+# Copy the rest of the backend source code
 COPY . .
-# Run tests during build - if tests fail, build fails
 
+# Run tests during build, fail build if tests fail
+RUN npm test
 
 # Expose the backend port
 EXPOSE 5000
 
-# Command to run the backend
+# Command to run the backend server
 CMD ["npm", "run", "start:backend"]
