@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import TaskList from '../components/TaskList';
+import TaskList from '../components/Tasklist';
 import { MemoryRouter } from 'react-router-dom';
 import axios from 'axios';
 import '@testing-library/jest-dom';
