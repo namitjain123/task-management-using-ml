@@ -98,11 +98,13 @@ const TaskForm = () => {
           value={tags} 
           onChange={(e) => setTags(e.target.value)} 
         />
-        <input 
-          type="date" 
-          value={dueDate} 
-          onChange={(e) => setDueDate(e.target.value)} 
-        />
+        <label htmlFor="dueDate">Due Date</label>
+          <input 
+            id="dueDate"
+            type="date" 
+            value={dueDate} 
+            onChange={(e) => setDueDate(e.target.value)} 
+          />
         <input 
           type="number" 
           placeholder="Estimated Time (in hours)" 
