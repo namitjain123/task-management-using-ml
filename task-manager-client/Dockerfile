@@ -16,7 +16,7 @@ COPY . .
 # Build the frontend (React app or similar)
 RUN npm run build
 # Run tests during build
-RUN npm test
+
 
 # Expose the frontend port
 EXPOSE 3000

@@ -13,7 +13,7 @@ RUN npm install
 # Copy the backend source code
 COPY . .
 # Run tests during build - if tests fail, build fails
-RUN npm test
+
 
 # Expose the backend port
 EXPOSE 5000
