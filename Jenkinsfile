@@ -7,12 +7,28 @@ pipeline {
                 bat 'docker build -f task-manager-client/Dockerfile -t task-manager-frontend task-manager-client/'
             }
         }
+       stage('Save Frontend Docker Image') {
+            steps {
+                bat 'docker save task-manager-frontend -o task-manager-frontend.tar'
+                archiveArtifacts artifacts: 'task-manager-frontend.tar', fingerprint: true
+            }
+        }
+
+
 
         stage('Build Backend') {
             steps {
                 bat 'docker build -f task-manager-backend/Dockerfile -t task-manager-backend task-manager-backend/'
             }
         }
+         stage('Save Backend Docker Image') {
+    steps {
+        bat 'docker save task-manager-backend -o task-manager-backend.tar'
+        archiveArtifacts artifacts: 'task-manager-backend.tar'
+    }
+}
+
+
 
         stage('Test Backend') {
             steps {
