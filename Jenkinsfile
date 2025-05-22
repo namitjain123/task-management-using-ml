@@ -36,25 +36,27 @@ pipeline {
             }
         }
 
-                stage('SonarQube Backend') {
-            steps {
-                withSonarQubeEnv('Local SonarQube') {
-                    dir('task-manager-backend') {
-                        bat 'sonar-scanner'
-                    }
-                }
-            }
-        }
+          stage('SonarQube Backend') {
+  steps {
+    withSonarQubeEnv('Local SonarQube') {
+      dir('task-manager-backend') {
+        bat 'docker run --rm -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli'
+      }
+    }
+  }
+}
 
-        stage('SonarQube Frontend') {
-            steps {
-                withSonarQubeEnv('Local SonarQube') {
-                    dir('task-manager-client') {
-                        bat 'sonar-scanner'
-                    }
-                }
-            }
-        }
+
+stage('SonarQube Frontend') {
+  steps {
+    withSonarQubeEnv('Local SonarQube') {
+      dir('task-manager-client') {
+        bat 'docker run --rm -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli'
+      }
+    }
+  }
+}
+
 
         stage('Run Backend') {
             steps {
@@ -70,11 +72,15 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Cleaning up Docker containers'
-            bat '''
-            for /f "tokens=*" %%i in ('docker ps -q') do docker rm -f %%i
-            '''
-        }
-    }
+  always {
+    echo 'Cleaning up Docker containers'
+    bat '''
+      docker ps -q > containers.txt
+      if exist containers.txt (
+        for /F "tokens=*" %%i in (containers.txt) do docker rm -f %%i
+      )
+    '''
+  }
+}
+
 }
