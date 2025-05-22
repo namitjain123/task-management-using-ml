@@ -36,6 +36,26 @@ pipeline {
             }
         }
 
+                stage('SonarQube Backend') {
+            steps {
+                withSonarQubeEnv('Local SonarQube') {
+                    dir('task-manager-backend') {
+                        bat 'sonar-scanner'
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Frontend') {
+            steps {
+                withSonarQubeEnv('Local SonarQube') {
+                    dir('task-manager-client') {
+                        bat 'sonar-scanner'
+                    }
+                }
+            }
+        }
+
         stage('Run Backend') {
             steps {
                 bat 'docker run -d -p 5000:5000 task-manager-backend'
