@@ -64,11 +64,14 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Cleaning up Docker containers'
-            bat '''
-                for /f "tokens=*" %%i in ('docker ps -q') do docker rm -f %%i
-            '''
-        }
-    }
+  always {
+    echo 'Cleaning up Docker containers'
+    bat '''
+      for /f "tokens=*" %%i in ('docker ps -q') do (
+        docker rm -f %%i
+      )
+    '''
+  }
+}
+
 }
