@@ -30,9 +30,9 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     dir('task-manager-backend') {
-                        bat '''
-                        docker run --rm -e SONAR_TOKEN=%SONAR_TOKEN% -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli
-                        '''
+                        bat """
+                            docker run --rm -e SONAR_TOKEN=%SONAR_TOKEN% -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli
+                        """
                     }
                 }
             }
@@ -42,9 +42,9 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     dir('task-manager-client') {
-                        bat '''
-                        docker run --rm -e SONAR_TOKEN=%SONAR_TOKEN% -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli
-                        '''
+                        bat """
+                            docker run --rm -e SONAR_TOKEN=%SONAR_TOKEN% -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli
+                        """
                     }
                 }
             }
@@ -67,10 +67,7 @@ pipeline {
         always {
             echo 'Cleaning up Docker containers'
             bat '''
-                docker ps -q > containers.txt
-                if exist containers.txt (
-                    for /F "tokens=*" %%i in (containers.txt) do docker rm -f %%i
-                )
+                for /f "tokens=*" %%i in ('docker ps -q') do docker rm -f %%i
             '''
         }
     }
