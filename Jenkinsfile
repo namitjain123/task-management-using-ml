@@ -16,47 +16,39 @@ pipeline {
 
         stage('Test Backend') {
             steps {
-                script {
-                    // Run backend container, execute tests, and capture exit code
-                    bat '''
-                    docker run --rm task-manager-backend sh -c "npm test"
-                    '''
-                }
+                bat 'docker run --rm task-manager-backend sh -c "npm test"'
             }
         }
 
         stage('Test Frontend') {
             steps {
-                script {
-                    // Run frontend container, execute tests, and capture exit code
-                    bat '''
-                    docker run --rm task-manager-frontend sh -c "npm test"
-                    '''
+                bat 'docker run --rm task-manager-frontend sh -c "npm test"'
+            }
+        }
+
+        stage('SonarQube Backend') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    dir('task-manager-backend') {
+                        bat '''
+                        docker run --rm -e SONAR_TOKEN=%SONAR_TOKEN% -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli
+                        '''
+                    }
                 }
             }
         }
 
-          stage('SonarQube Backend') {
-  steps {
-    withSonarQubeEnv('Local SonarQube') {
-      dir('task-manager-backend') {
-        bat 'docker run --rm -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli'
-      }
-    }
-  }
-}
-
-
-stage('SonarQube Frontend') {
-  steps {
-    withSonarQubeEnv('Local SonarQube') {
-      dir('task-manager-client') {
-        bat 'docker run --rm -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli'
-      }
-    }
-  }
-}
-
+        stage('SonarQube Frontend') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    dir('task-manager-client') {
+                        bat '''
+                        docker run --rm -e SONAR_TOKEN=%SONAR_TOKEN% -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli
+                        '''
+                    }
+                }
+            }
+        }
 
         stage('Run Backend') {
             steps {
@@ -72,15 +64,14 @@ stage('SonarQube Frontend') {
     }
 
     post {
-  always {
-    echo 'Cleaning up Docker containers'
-    bat '''
-      docker ps -q > containers.txt
-      if exist containers.txt (
-        for /F "tokens=*" %%i in (containers.txt) do docker rm -f %%i
-      )
-    '''
-  }
-}
-
+        always {
+            echo 'Cleaning up Docker containers'
+            bat '''
+                docker ps -q > containers.txt
+                if exist containers.txt (
+                    for /F "tokens=*" %%i in (containers.txt) do docker rm -f %%i
+                )
+            '''
+        }
+    }
 }
