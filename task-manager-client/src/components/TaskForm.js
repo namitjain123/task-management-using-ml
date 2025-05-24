@@ -9,11 +9,11 @@ const TaskForm = () => {
   const [tags, setTags] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [estimatedTime, setEstimatedTime] = useState('');
-  const [priority, setPriority] = useState('');
+  const [priority, setPriority] = useState('Medium');
   const [error, setError] = useState('');
   const navigate = useNavigate();  // Using useNavigate instead of useHistory
   const { id } = useParams();  // For editing existing tasks
-  const [taskPriority, setTaskPriority] = useState(null);
+  
 
   // Fetch task data for editing
   useEffect(() => {
@@ -37,7 +37,7 @@ const TaskForm = () => {
           setTags(res.data.tags);
           setDueDate(res.data.dueDate);
           setEstimatedTime(res.data.estimatedTime);
-          setPriority(res.data.priority);
+          setPriority(res.data.priority ||'Medium');
         } catch (err) {
           console.error(err);
           setError('Failed to fetch task');
@@ -113,11 +113,7 @@ const TaskForm = () => {
         />
         <button type="submit">{id ? 'Update Task' : 'Create Task'}</button>
       </form>
-      {taskPriority && (
-        <div>
-          <h3>Predicted Priority: {taskPriority}</h3>
-        </div>
-      )}
+      <p>Task Priority: {priority}</p>  {/* Hardcoded priority display */}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 // controllers/taskController.js
 const Task = require('../models/Task');
 const mlService = require('../services/mlService');
-const { predictTaskPriority } = require('../services/mlService');
+// const { predictTaskPriority } = require('../services/mlService');
 
 // Get all tasks for a user
 exports.getTasks = async (req, res) => {
@@ -42,16 +42,18 @@ exports.createTask = async (req, res) => {
   try {
     // Add log to verify model is being called
     console.log('Calling the model for prediction...');
-    const predictedPriority = await predictTaskPriority(description, tags);
+    // const predictedPriority = await predictTaskPriority(description, tags);
+    const priority = 'Medium';
     
     // Add log to check predictedPriority
-    console.log('Predicted Priority:', predictedPriority);
+    
 
     const newTask = new Task({
       title,
       description,
       dueDate: dueDate || null,
-      priority: predictedPriority || 'Medium',
+      // priority: predictedPriority || 'Medium',
+      priority,
       tags: tags || [],
       estimatedTime: timeInMinutes,
       assignedTo: assignedTo || 'Unassigned',
@@ -76,9 +78,9 @@ exports.editTask = async (req, res) => {
   
     try {
       // Predict the task priority using the ML model
-      const predictedPriority = await predictTaskPriority(description, tags);
+      // const predictedPriority = await predictTaskPriority(description, tags);
 
-      const updatedTask = await Task.findByIdAndUpdate(taskId, { title, description, tags, estimatedTime, assignedTo, priority: predictedPriority }, { new: true });
+      const updatedTask = await Task.findByIdAndUpdate(taskId, { title, description, tags, estimatedTime, assignedTo, priority: 'Medium' }, { new: true });
       if (!updatedTask) return res.status(404).send('Task not found');
       res.status(200).send(updatedTask);
     } catch (err) {
